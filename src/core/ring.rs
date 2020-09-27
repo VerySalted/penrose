@@ -15,6 +15,10 @@ pub enum Direction {
     Forward,
     /// decrease the index, wrapping if needed
     Backward,
+    /// move the index to the front (index = 0)
+    Front,
+    /// move the index to the back (index = last)
+    Back,
 }
 
 impl Direction {
@@ -23,6 +27,8 @@ impl Direction {
         match self {
             Direction::Forward => Direction::Backward,
             Direction::Backward => Direction::Forward,
+            Direction::Front => Direction::Back,
+            Direction::Back => Direction::Front,
         }
     }
 }
@@ -103,6 +109,8 @@ impl<T> Ring<T> {
         match direction {
             Direction::Forward => self.elements.rotate_right(1),
             Direction::Backward => self.elements.rotate_left(1),
+            Direction::Front => {},
+            Direction::Back => {},
         }
     }
 
@@ -123,6 +131,12 @@ impl<T> Ring<T> {
                     self.focused - 1
                 }
             }
+            Direction::Front => {
+                0
+            }
+            Direction::Back => {
+                max
+            }
         }
     }
 
@@ -135,6 +149,7 @@ impl<T> Ring<T> {
         match (self.focused, self.next_index(direction), direction) {
             (0, _, Direction::Backward) => self.rotate(direction),
             (_, 0, Direction::Forward) => self.rotate(direction),
+            (focused, top, Direction::Front) => self.elements.swap(focused, top),
             (focused, other, _) => self.elements.swap(focused, other),
         }
 
